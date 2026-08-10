@@ -1,0 +1,296 @@
+CREATE TABLE members (
+    id BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT(20) UNSIGNED NOT NULL UNIQUE, -- 一個 user_id 只能有一筆
+    member_id VARCHAR(20) UNIQUE,                -- U-000001 格式
+    status ENUM('active','inactive') NOT NULL DEFAULT 'active',
+    mobile VARCHAR(20),
+    plate_no VARCHAR(20),
+    membership_segment VARCHAR(50),
+    rfid_no VARCHAR(100),
+    last_active TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE roles (
+    id BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    role VARCHAR(100) NOT NULL UNIQUE,
+    realtime BOOLEAN NOT NULL DEFAULT FALSE,              -- Real-Time Monitoring
+    dashboard BOOLEAN NOT NULL DEFAULT FALSE,             -- Dashboard
+    transactions BOOLEAN NOT NULL DEFAULT FALSE,          -- Transactions & Billing
+    maintenance BOOLEAN NOT NULL DEFAULT FALSE,           -- Maintenance Management
+    reports BOOLEAN NOT NULL DEFAULT FALSE,               -- Reports & Analytics
+    device BOOLEAN NOT NULL DEFAULT FALSE,                -- Device Management
+    workorder BOOLEAN NOT NULL DEFAULT FALSE,             -- Work Order Management
+    member BOOLEAN NOT NULL DEFAULT FALSE,                -- Member Management
+    permission BOOLEAN NOT NULL DEFAULT FALSE,            -- Permission Settings
+    account BOOLEAN NOT NULL DEFAULT FALSE                -- Account Management
+);
+
+INSERT INTO roles (
+    role, realtime, dashboard, transactions, maintenance, reports,
+    device, workorder, member, permission, account
+) VALUES
+-- Super Admin：全部功能都有
+('Super Admin', TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE),
+
+-- System Admin：除了 Work Order Mgmt. 沒有，其餘都有
+('System Admin', TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE),
+
+-- Operations Manager：有 Monitoring、Dashboard、Transactions、Reports、Work Order，其餘沒有
+('Operations Manager', TRUE, TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE),
+
+-- O&M Technician：有 Monitoring、Dashboard、Maintenance、Device、Work Order，其餘沒有
+('O&M Technician', TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE),
+
+-- Customer Support：有 Monitoring、Dashboard、Transactions、Reports、Member，其餘沒有
+('Customer Support', TRUE, TRUE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, FALSE, FALSE);
+
+ALTER TABLE members
+ADD COLUMN role_id BIGINT(20) UNSIGNED AFTER user_id,
+ADD CONSTRAINT fk_members_role
+    FOREIGN KEY (role_id) REFERENCES roles(id);
+
+ALTER TABLE members 
+MODIFY COLUMN status VARCHAR(32) DEFAULT 'inactive';
+
+
+-- 建立工單與產量 KPI 表
+CREATE TABLE kpi_daily (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    date DATE NOT NULL,
+    orders INT NOT NULL,       -- 今日工單量
+    ok_qty INT NOT NULL,       -- 今日 OK 數量
+    ng_qty INT NOT NULL        -- 今日 NG 數量
+);
+
+-- 建立圖表資料表
+CREATE TABLE production_chart (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    date DATE NOT NULL,
+    ng INT NOT NULL,           -- 當日最大 NG
+    ok INT NOT NULL,           -- 當日最大 OK
+    total INT NOT NULL,        -- 當日最大總產量
+    line INT NOT NULL          -- 當日總產量 (kW)
+);
+-- KPI 資料
+INSERT INTO kpi_daily (date, orders, ok_qty, ng_qty) VALUES
+('2022-06-18', 1294, 750, 294);
+
+-- 圖表資料
+INSERT INTO production_chart (date, ng, ok, total, line) VALUES
+('2022-06-18', 700, 2900, 4200, 630),
+('2022-06-19', 800, 1000, 1300, 170),
+('2022-06-20', 750, 1100, 2200, 190),
+('2022-06-21', 800, 1000, 1300, 140),
+('2022-06-22', 700, 3200, 5000, 890),
+('2022-06-23', 900, 3100, 5500, 1010),
+('2022-06-24', 750, 2900, 6000, 878);
+
+
+CREATE TABLE ic_work_orders (
+    start_date DATE,
+    work_order_code VARCHAR(20),
+    part_number VARCHAR(50),
+    work_order_qty INT,
+    stock_qty INT,
+    status VARCHAR(20),
+    completion_date DATE,
+    model VARCHAR(100)
+);
+
+INSERT INTO ic_work_orders 
+(start_date, work_order_code, part_number, work_order_qty, stock_qty, status, completion_date, model)
+VALUES
+('2026-05-29', 'MFP2650002', 'ZFBFG200GMBHD22C5P', 2734, 2734, '7入庫', '2026-06-03', 'FB; FG-200G-MB-HD 紫 22C5'),
+('2026-06-01', 'MFP2660001', 'ZFWFS1203RVSO2010P', 20, 20, '7入庫', '2026-06-03', 'IC; S-FLASH SMD W25Q32RVSIQ (SO8)燒錄'),
+('2026-06-02', 'MFP2660002', 'ZFBFG200GMB80400P', 3180, 3180, '3發放', '2026-06-26', 'FB; FG-200G-MB 藍色 08D4'),
+('2026-06-12', 'MFP2660003', 'ZFBFAZFMG1000LS011', 805, 805, '3發放', '2026-07-03', 'FB; FAZ-FMG-1000G 橘色 CBA6'),
+('2026-06-22', 'MFP2660004', 'ZFBFML900GMB850270', 440, 440, '3發放', '2026-07-06', 'FB; FML-900G-MB 紅色 DS01');
+
+
+DROP TABLE IF EXISTS ic_work_detail;
+
+CREATE TABLE ic_work_detail (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    -- 工單資訊
+    work_order_no VARCHAR(50) NOT NULL,
+    quantity INT,
+    smt_work_order VARCHAR(50),
+    material_no VARCHAR(50),
+    start_date DATE,
+    completion_date DATE,
+    product_name VARCHAR(100),
+    specification VARCHAR(255),
+    model VARCHAR(100),
+
+    -- IC資訊
+    ic_part_no VARCHAR(50),
+    package_type VARCHAR(50),
+    ic_vendor VARCHAR(100),
+    ic_name VARCHAR(100),
+    reel_id VARCHAR(50),
+    ic_spec VARCHAR(255),
+
+    -- 燒錄資訊
+    burn_file_no VARCHAR(50),
+    program_file_path VARCHAR(255),
+    file_name VARCHAR(255),
+    checksum VARCHAR(100),
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+INSERT INTO ic_work_detail
+(
+work_order_no,quantity,smt_work_order,material_no,
+start_date,completion_date,product_name,specification,model,
+ic_part_no,package_type,ic_vendor,ic_name,reel_id,ic_spec,
+burn_file_no,program_file_path,file_name,checksum
+)
+VALUES
+
+('WO2026001',100,'SMT25060101','MAT001',
+'2026-06-01','2026-06-02','工業主機板A','Intel Core i5','IBASE-MB100',
+'IC1001','QFP','Winbond','W25Q128JV','R001','128Mbit SPI Flash',
+'BF001','/files/ic1001_v1.hex','ic1001_v1.hex','ABC123'),
+
+('WO2026002',200,'SMT25060102','MAT002',
+'2026-06-03','2026-06-04','工業主機板B','Intel Core i7','IBASE-MB200',
+'IC1002','QFN','MXIC','MX25L128','R002','128Mbit SPI Flash',
+'BF002','/files/ic1002_v1.hex','ic1002_v1.hex','ABC124'),
+
+('WO2026003',150,'SMT25060103','MAT003',
+'2026-06-05','2026-06-06','嵌入式控制板A','ARM Cortex-A53','ARM-CTRL100',
+'IC1003','BGA','ESMT','F59L1G81','R003','1Gbit NAND',
+'BF003','/files/ic1003_v1.hex','ic1003_v1.hex','ABC125'),
+
+('WO2026004',300,'SMT25060104','MAT004',
+'2026-06-07','2026-06-08','網通板卡A','Intel Atom','NET-100',
+'IC1004','QFP','GigaDevice','GD25Q128','R004','128Mbit SPI Flash',
+'BF004','/files/ic1004_v1.hex','ic1004_v1.hex','ABC126'),
+
+('WO2026005',500,'SMT25060105','MAT005',
+'2026-06-09','2026-06-10','網通板卡B','Intel Atom','NET-200',
+'IC1005','QFN','Winbond','W25Q256JV','R005','256Mbit SPI Flash',
+'BF005','/files/ic1005_v1.hex','ic1005_v1.hex','ABC127'),
+
+('WO2026006',120,'SMT25060106','MAT006',
+'2026-06-11','2026-06-12','AI Box A','Intel N97','AIBOX-100',
+'IC1006','BGA','MXIC','MX66L51235F','R006','512Mbit SPI Flash',
+'BF006','/files/ic1006_v1.hex','ic1006_v1.hex','ABC128'),
+
+('WO2026007',250,'SMT25060107','MAT007',
+'2026-06-13','2026-06-14','AI Box B','Intel i3','AIBOX-200',
+'IC1007','QFP','GigaDevice','GD25Q64','R007','64Mbit SPI Flash',
+'BF007','/files/ic1007_v1.hex','ic1007_v1.hex','ABC129'),
+
+('WO2026008',180,'SMT25060108','MAT008',
+'2026-06-15','2026-06-16','Panel PC A','Intel N5105','PPC-100',
+'IC1008','QFN','ESMT','F59D2G81A','R008','2Gbit NAND',
+'BF008','/files/ic1008_v1.hex','ic1008_v1.hex','ABC130'),
+
+('WO2026009',220,'SMT25060109','MAT009',
+'2026-06-17','2026-06-18','Panel PC B','Intel J6412','PPC-200',
+'IC1009','BGA','Winbond','W29N02GV','R009','2Gbit NAND',
+'BF009','/files/ic1009_v1.hex','ic1009_v1.hex','ABC131'),
+
+('WO2026010',350,'SMT25060110','MAT010',
+'2026-06-19','2026-06-20','邊緣運算平台','Intel Core Ultra 5','EDGE-100',
+'IC1010','QFP','MXIC','MX25L25645G','R010','256Mbit SPI Flash',
+'BF010','/files/ic1010_v1.hex','ic1010_v1.hex','ABC132');
+
+-- 建立資料表
+CREATE TABLE ic_burn_operations (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    reel_id VARCHAR(50),
+    quantity INT,
+    work_order VARCHAR(50),
+    ic_part_no VARCHAR(50),
+    zf_part_no VARCHAR(50),
+    ic_name VARCHAR(100),
+    gun_id VARCHAR(50),
+    ic_spec VARCHAR(100),
+    jig_id VARCHAR(50),
+    package_type VARCHAR(50),
+    tape_id VARCHAR(50),
+    ic_vendor VARCHAR(100),
+    gun_spec VARCHAR(100),
+    jig_spec VARCHAR(100),
+    tape_spec VARCHAR(100),
+    burn_file_no VARCHAR(100),
+    burn_file_path VARCHAR(255),
+    burn_file_name VARCHAR(100),
+    checksum VARCHAR(100)
+);
+
+-- 插入測試資料
+INSERT INTO ic_burn_operations (
+    reel_id, quantity, work_order, ic_part_no, zf_part_no, ic_name,
+    gun_id, ic_spec, jig_id, package_type, tape_id, ic_vendor,
+    gun_spec, jig_spec, tape_spec, burn_file_no, burn_file_path,
+    burn_file_name, checksum
+) VALUES
+('R001', 1000, 'WO20260701', 'IC12345', 'ZF67890', 'MCU-ATmega328',
+ 'GUN01', 'QFP-32', 'JIG01', 'Tray', 'TP001', 'Microchip',
+ 'SPEC-A', 'SPEC-J1', 'SPEC-T1', 'BF001', '/burnfiles/2026/',
+ 'firmware_v1.hex', 'ABC123'),
+('R002', 500, 'WO20260702', 'IC54321', 'ZF09876', 'EEPROM-24C02',
+ 'GUN02', 'SOP-8', 'JIG02', 'Tape', 'TP002', 'Winbond',
+ 'SPEC-B', 'SPEC-J2', 'SPEC-T2', 'BF002', '/burnfiles/2026/',
+ 'eeprom_v2.hex', 'XYZ789');
+
+CREATE TABLE ic_burn_records (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    production_date DATE,          -- 生產日期
+    work_order_no VARCHAR(50),     -- 工單編號
+    status VARCHAR(50),            -- 狀態
+    part_no VARCHAR(100),          -- 料號
+    order_qty INT,                 -- 工單數
+    good_qty INT,                  -- 良品數
+    ng_qty INT,                    -- 不良數
+    yield_rate DECIMAL(5,2),       -- 良率 (%)
+    start_time DATETIME,           -- 開始時間
+    end_time DATETIME,             -- 結束時間
+    hours DECIMAL(4,1),            -- 時數
+    uph DECIMAL(6,1),              -- UPH
+    model VARCHAR(50),             -- 機種
+    jig_no VARCHAR(50)             -- 治具編號
+);
+INSERT INTO ic_burn_records 
+(production_date, work_order_no, status, part_no, order_qty, good_qty, ng_qty, yield_rate, start_time, end_time, hours, uph, model, jig_no)
+VALUES
+('2026-06-16','MFP2650001','7.入庫','ZFBFG200GMBHD22C5P',2734,2733,1,99.96,'2026-06-16 10:11:30','2026-06-16 17:11:30',7.0,390.4,'A1','JIG001'),
+('2026-06-17','MFP2650002','6.生產中','ZFBFG200GMBHD22C5P',1500,1498,2,99.87,'2026-06-17 08:00:00','2026-06-17 15:00:00',7.0,214.0,'A1','JIG002'),
+('2026-06-18','MFP2650003','7.入庫','ZFBFG200GMBHD22C5P',3200,3199,1,99.97,'2026-06-18 09:00:00','2026-06-18 17:00:00',8.0,400.0,'B2','JIG003'),
+('2026-06-19','MFP2650004','5.待檢','ZFBFG200GMBHD22C5P',2800,2795,5,99.82,'2026-06-19 07:30:00','2026-06-19 14:30:00',7.0,400.0,'B2','JIG004'),
+('2026-06-20','MFP2650005','7.入庫','ZFBFG200GMBHD22C5P',2500,2499,1,99.96,'2026-06-20 08:00:00','2026-06-20 16:00:00',8.0,312.4,'C3','JIG005'),
+('2026-06-21','MFP2650006','6.生產中','ZFBFG200GMBHD22C5P',1800,1799,1,99.94,'2026-06-21 09:00:00','2026-06-21 15:00:00',6.0,300.0,'C3','JIG006'),
+('2026-06-22','MFP2650007','7.入庫','ZFBFG200GMBHD22C5P',2200,2199,1,99.95,'2026-06-22 08:30:00','2026-06-22 16:30:00',8.0,275.0,'D4','JIG007'),
+('2026-06-23','MFP2650008','5.待檢','ZFBFG200GMBHD22C5P',3000,2998,2,99.93,'2026-06-23 07:00:00','2026-06-23 15:00:00',8.0,375.0,'D4','JIG008'),
+('2026-06-24','MFP2650009','7.入庫','ZFBFG200GMBHD22C5P',2600,2599,1,99.96,'2026-06-24 09:00:00','2026-06-24 17:00:00',8.0,325.0,'E5','JIG009'),
+('2026-06-25','MFP2650010','6.生產中','ZFBFG200GMBHD22C5P',2400,2398,2,99.92,'2026-06-25 08:00:00','2026-06-25 15:00:00',7.0,342.8,'E5','JIG010'),
+('2026-06-26','MFP2650011','7.入庫','ZFBFG200GMBHD22C5P',3100,3099,1,99.97,'2026-06-26 07:30:00','2026-06-26 15:30:00',8.0,387.4,'F6','JIG011'),
+('2026-06-27','MFP2650012','5.待檢','ZFBFG200GMBHD22C5P',2000,1999,1,99.95,'2026-06-27 08:00:00','2026-06-27 14:00:00',6.0,333.2,'F6','JIG012'),
+('2026-06-28','MFP2650013','7.入庫','ZFBFG200GMBHD22C5P',2700,2699,1,99.96,'2026-06-28 09:00:00','2026-06-28 17:00:00',8.0,337.4,'G7','JIG013'),
+('2026-06-29','MFP2650014','6.生產中','ZFBFG200GMBHD22C5P',2300,2298,2,99.91,'2026-06-29 08:00:00','2026-06-29 16:00:00',8.0,287.4,'G7','JIG014'),
+('2026-06-30','MFP2650015','7.入庫','ZFBFG200GMBHD22C5P',2900,2899,1,99.97,'2026-06-30 07:00:00','2026-06-30 15:00:00',8.0,362.4,'H8','JIG015'),
+('2026-07-01','MFP2650016','5.待檢','ZFBFG200GMBHD22C5P',2100,2099,1,99.95,'2026-07-01 09:00:00','2026-07-01 15:00:00',6.0,350.0,'H8','JIG016'),
+('2026-07-02','MFP2650017','7.入庫','ZFBFG200GMBHD22C5P',2800,2799,1,99.96,'2026-07-02 08:30:00','2026-07-02 16:30:00',8.0,350.0,'I9','JIG017'),
+('2026-07-03','MFP2650018','6.生產中','ZFBFG200GMBHD22C5P',2600,2598,2,99.92,'2026-07-03 07:30:00','2026-07-03 15:30:00',8.0,325.0,'I9','JIG018'),
+('2026-07-04','MFP2650019','7.入庫','ZFBFG200GMBHD22C5P',2400,2399,1,99.96,'2026-07-04 08:00:00','2026-07-04 16:00:00',8.0,300.0,'J10','JIG019'),
+('2026-07-05','MFP2650020','5.待檢','ZFBFG200GMBHD22C5P',2200,2199,1,99.95,'2026-07-05 09:00:00','2026-07-05 15:00:00',6.0,366.6,'J10','JIG020');
+
+CREATE TABLE ic_defects (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    production_date DATE,       -- 生產日期
+    work_order_no VARCHAR(50),  -- 工單編號
+    defect_type VARCHAR(100),   -- 不良原因 (USB NG, LED NG, etc.)
+    defect_position VARCHAR(100), -- 不良位置 (U66, U30, etc.)
+    defect_count INT            -- 不良數量
+);
+

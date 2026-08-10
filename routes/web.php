@@ -14,6 +14,11 @@ use App\Http\Controllers\workorderController;
 use App\Http\Controllers\memberController;
 use App\Http\Controllers\permissionController;
 use App\Http\Controllers\accountController;
+use App\Http\Controllers\IcWorkDetailController;
+use App\Http\Controllers\IcBurnOperationsController;
+use App\Http\Controllers\BurnRecordController;
+use App\Http\Controllers\DefectController;
+use App\Http\Controllers\WorkOrderSearchController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -75,10 +80,6 @@ Route::get('/transactions', [transactionsController::class, 'show'])
     ->middleware(['auth', 'verified'])
     ->name('transactions');
 
-Route::get('/maintenance', [maintenanceController::class, 'show'])
-    ->middleware(['auth', 'verified'])
-    ->name('maintenance');
-
 Route::get('/workorders', [workorderController::class, 'index'])->name('workorders.index');
 Route::post('/workorders', [workorderController::class, 'store'])->name('workorders.store');
 // 顯示新增工單表單 
@@ -111,3 +112,37 @@ Route::get('/account', [accountController::class, 'show'])
 Route::post('/account/store', [accountController::class, 'store'])
     ->middleware(['auth', 'verified'])
     ->name('account.store');
+
+Route::get('/account/delete/{id}', [accountController::class, 'destroy'])
+    ->middleware(['auth', 'verified'])
+    ->name('account.delete');
+
+//FITS
+Route::get('/maintenance', [maintenanceController::class, 'show'])
+    ->middleware(['auth', 'verified'])
+    ->name('maintenance');
+
+Route::get('/IcWorkDetail', [IcWorkDetailController::class, 'show'])
+    ->middleware(['auth', 'verified'])
+    ->name('IcWorkDetail');
+Route::get('/api/ic-work-order', [IcWorkDetailController::class, 'getWorkOrder'])
+    ->middleware(['auth', 'verified']);
+
+Route::get('/IcBurnOperations', [IcBurnOperationsController::class, 'show'])
+    ->middleware(['auth', 'verified'])
+    ->name('IcBurnOperations');
+
+Route::get('/api/ic-burn-operations', [IcBurnOperationsController::class, 'getWorkOrder'])
+    ->middleware(['auth', 'verified']);
+
+Route::get('/BurnRecord', [BurnRecordController::class, 'show'])
+    ->middleware(['auth', 'verified'])
+    ->name('BurnRecord');    
+
+Route::get('/Defect', [DefectController::class, 'show'])
+    ->middleware(['auth', 'verified'])
+    ->name('Defect');  
+
+Route::get('/WorkOrderSearch', [WorkOrderSearchController::class, 'show'])
+    ->middleware(['auth', 'verified'])
+    ->name('WorkOrderSearch');    

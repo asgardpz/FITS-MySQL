@@ -1,105 +1,200 @@
-# EV Charger Backend System
+# FITS — Factory Intelligent Tracking System
 
-這是一個電動車充電樁的後台管理系統，提供完整的帳號、設備、交易與維護管理功能，並支援角色與權限控管。
+<p align="center">
 
----
+# 🏭 FITS
+### Factory Intelligent Tracking System
 
-## 系統功能與介面截圖
+**Smart Factory Management Platform for IC Programming & Manufacturing Traceability**
 
-### Home
-系統首頁，進入後台入口  
-![Home](https://github.com/asgardpz/iEMS/blob/main/public/home.jpg)
-
-### Login
-使用者登入介面，支援帳號密碼驗證  
-![Login](https://github.com/asgardpz/iEMS/blob/main/public/LogIn.jpg)
-
-### SignUp
-新使用者註冊功能，建立帳號並分配角色  
-![SignUp](https://github.com/asgardpz/iEMS/blob/main/public/SignUp.jpg)
-
-### Real-Time Monitoring
-即時監控充電樁狀態與使用情況  
-![RealTime](https://github.com/asgardpz/iEMS/blob/main/public/Real-Time.jpg)
-
-### Dashboard
-系統總覽，顯示主要統計數據與指標  
-![Dashboard](https://github.com/asgardpz/iEMS/blob/main/public/Dashboard.jpg)
-
-### Transactions & Billing
-交易紀錄查詢、帳單管理與費率設定  
-![Transactions](https://github.com/asgardpz/iEMS/blob/main/public/Transactions.jpg)
-
-### Maintenance Management
-維護工單建立與追蹤，設備維修紀錄管理  
-![Maintenance](https://github.com/asgardpz/iEMS/blob/main/public/Maintenance.jpg)
-
-### Reports & Analytics
-報表產生 (PDF/CSV 匯出)，使用數據分析  
-![Reports](https://github.com/asgardpz/iEMS/blob/main/public/Reports.jpg)
-
-### Device Management
-充電樁設備清單，設備狀態與設定管理  
-![Device](https://github.com/asgardpz/iEMS/blob/main/public/Device.jpg)
-
-### Work Order Management
-工單建立、分派與進度追蹤  
-![WorkOrder](https://github.com/asgardpz/iEMS/blob/main/public/WorkOrder.jpg)
-
-### Member Management
-使用者帳號管理，員工/客戶資訊維護  
-![Member](https://github.com/asgardpz/iEMS/blob/main/public/Member.jpg)
-
-### Permission Settings
-角色與權限控管，功能存取限制設定  
-![Permission](https://github.com/asgardpz/iEMS/blob/main/public/Permission.jpg)
-
-### Account Management
-帳號建立、編輯、刪除，密碼修改與狀態管理，搜尋與篩選帳號，登入紀錄查詢  
-![Account](https://github.com/asgardpz/iEMS/blob/main/public/Account.jpg)
+整合 **MES、ERP、自動燒錄機、LiteDB、BarTender**，
+提供完整 IC 燒錄流程追蹤、設備管理與智慧製造資訊整合平台。
 
 ---
 
-## API 說明
+## ✨ Features
 
-本系統除了後台管理介面外，還提供 **前台 Client API** 與 **後台 Server API**，讓充電樁設備能以 JSON 格式與系統資料庫互動。
-
-### Client API
-前台模擬介面，提供設備端呼叫 API 的方式，支援：
-- 裝置狀態上報（電流、電壓、溫度、功率）
-- 裝置動作（如韌體更新）
-- 韌體目錄查詢
-- 充電 Session 建立與查詢
-- 支付紀錄
-- 站點資訊
-
-![Client API](https://github.com/asgardpz/iEMS/blob/main/public/ClientAPI.jpg)
-
-### Server API
-後台 API UI，提供管理者檢視與操作：
-- **Device Status History**：紀錄設備狀態（online, inuse, offline, maintenance）與電流/電壓/溫度/功率等參數
-- **Device Actions**：設備動作紀錄（如韌體更新），包含版本、來源 URL、checksum、排程等資訊
-
-![Server API](https://github.com/asgardpz/iEMS/blob/main/public/ServerAPI.jpg)
+- 📊 Dashboard 即時資訊看板
+- 🔍 IC 燒錄工單查詢
+- 📄 工單資訊整合
+- ⚙️ 設備操作管理
+- 🏷 Reel ID 追溯
+- 📈 生產資訊整合
+- 🔄 MES / ERP / DP3T+ 資料整合
 
 ---
 
-## 系統架構圖 (文字模式)
-![Flow](https://github.com/asgardpz/iEMS/blob/main/public/Flow.jpg)
+# 🏗 System Architecture
+
+> 依據 FITS.docx 內容整理。
+
+```
+                 +----------------+
+                 |      ERP       |
+                 +--------+-------+
+                          |
++---------+       +--------v-------+      +-------------+
+| LiteDB  |------>|     MESApi     |<-----|     MES     |
++---------+       +--------+-------+      +-------------+
+                          |
+                   +------v------+
+                   |    FITS     |
+                   +------+------+
+                          |
+          +---------------+---------------+
+          |       |        |        |      |
+      Dashboard Query  Detail  Device  Reports
+                          |
+                   +------v------+
+                   | BarTender   |
+                   +-------------+
+```
+
 ---
 
-## 技術架構
+# 📷 Demo Screenshots
 
-- **後端框架**：Laravel (PHP)
-- **前端**：Blade + JavaScript + CSS
-- **資料庫**：MySQL
-- **版本控制**：GitHub
+> 建議將 Word 內圖片匯出到 `images/` 目錄。
+
+## Home
+
+![Home](images/home.png)
+
+- Logo
+- 打字效果系統介紹
+- 跑馬燈功能介紹
+- Login / Sign Up
 
 ---
 
-## 安裝與使用
+## Login
 
-1. Clone 專案：
-   ```bash
-   git clone https://github.com/asgardpz/iEMS.git
+![Login](images/login.png)
 
+- iBASE 官網連結
+- FITS 首頁
+- 登入介面
+
+---
+
+## Dashboard
+
+![Dashboard](images/dashboard.png)
+
+- Dashboard
+- 功能入口
+- Logout
+
+---
+
+## IC Programming Menu
+
+![Menu](images/menu.png)
+
+- IC 燒錄功能清單
+- 收合 / 展開
+
+---
+
+## Work Order Query
+
+![Query](images/workorder_query.png)
+
+資料來源：
+
+- MES
+- Reel ID（BarTender）
+
+---
+
+## Work Order Detail
+
+![Detail](images/workorder_detail.png)
+
+整合：
+
+- ERP
+- MES
+- LiteDB
+
+---
+
+## Device Operation
+
+![Device](images/device_operation.png)
+
+流程：
+
+1. Scan Reel ID
+2. Work Order
+3. Fixture
+4. Nozzle
+5. Tape
+6. Validation
+7. Start
+
+---
+
+# 📂 Project Structure
+
+```text
+FITS/
+│
+├── Laravel/
+├── MESApi/
+├── DP3TApi/
+├── images/
+│   ├── architecture.png
+│   ├── home.png
+│   ├── login.png
+│   ├── dashboard.png
+│   ├── menu.png
+│   ├── workorder_query.png
+│   ├── workorder_detail.png
+│   └── device_operation.png
+├── README.md
+```
+
+---
+
+# 🗄 Data Sources
+
+| Source | Description |
+|--------|-------------|
+| MES | Manufacturing Execution System |
+| ERP | Work Order / Material Information |
+| LiteDB | DP3T+ Programming Machine |
+| BarTender | Reel ID Traceability |
+
+---
+
+# 💻 Technology Stack
+
+| Category | Technology |
+|----------|------------|
+| Backend | ASP.NET Core Web API |
+| Web | Laravel |
+| Database | MySQL / Oracle / LiteDB |
+| Frontend | HTML / CSS / JavaScript |
+| UI | Bootstrap |
+
+---
+
+# 🚀 Roadmap
+
+- AI Dashboard
+- SPC Analysis
+- Yield Analytics
+- Equipment Monitoring
+- Predictive Maintenance
+- Report Center
+
+---
+
+# 📄 License
+
+This project is for demonstration and internal manufacturing integration purposes.
+
+---
+
+> README generated from the current FITS system architecture and function description in FITS.docx.

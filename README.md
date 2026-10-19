@@ -58,7 +58,7 @@
 
 ## Home
 
-![Home](images/home.png)
+![Home](https://github.com/asgardpz/FITS-MySQL/blob/main/public/assets/images/1.jpg)
 
 - Logo
 - 打字效果系統介紹

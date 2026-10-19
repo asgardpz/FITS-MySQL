@@ -54,7 +54,7 @@
 
 # 📷 Demo Screenshots
 
-> 建議將 Word 內圖片匯出到 `images/` 目錄。
+![Demo](https://github.com/asgardpz/FITS-MySQL/blob/main/public/assets/images/4.jpg)
 
 ## Home
 

@@ -58,7 +58,7 @@
 
 ## Home
 
-![Home](https://github.com/asgardpz/FITS-MySQL/blob/main/public/assets/images/1.jpg)
+
 
 - Logo
 - 打字效果系統介紹
@@ -69,7 +69,7 @@
 
 ## Login
 
-![Login](images/login.png)
+![Login](https://github.com/asgardpz/FITS-MySQL/blob/main/public/assets/images/1.jpg)
 
 - iBASE 官網連結
 - FITS 首頁
@@ -79,7 +79,7 @@
 
 ## Dashboard
 
-![Dashboard](images/dashboard.png)
+![Dashboard](https://github.com/asgardpz/FITS-MySQL/blob/main/public/assets/images/5.jpg)
 
 - Dashboard
 - 功能入口
@@ -89,7 +89,7 @@
 
 ## IC Programming Menu
 
-![Menu](images/menu.png)
+![IC Programming](https://github.com/asgardpz/FITS-MySQL/blob/main/public/assets/images/3.jpg)
 
 - IC 燒錄功能清單
 - 收合 / 展開
@@ -98,7 +98,7 @@
 
 ## Work Order Query
 
-![Query](images/workorder_query.png)
+![Work Order Query](https://github.com/asgardpz/FITS-MySQL/blob/main/public/assets/images/6.jpg)
 
 資料來源：
 
@@ -109,7 +109,7 @@
 
 ## Work Order Detail
 
-![Detail](images/workorder_detail.png)
+![Work Order Detail](https://github.com/asgardpz/FITS-MySQL/blob/main/public/assets/images/7.jpg)
 
 整合：
 
@@ -121,7 +121,7 @@
 
 ## Device Operation
 
-![Device](images/device_operation.png)
+![Device Operation](https://github.com/asgardpz/FITS-MySQL/blob/main/public/assets/images/2.jpg)
 
 流程：
 

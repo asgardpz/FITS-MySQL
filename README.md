@@ -1,32 +1,31 @@
-# FITS — Factory Intelligent Tracking System
+# MFIS - Manufacturing Factory Integration 
 
 <p align="center">
 
-# 🏭 FITS
-### Factory Intelligent Tracking System
+# 🏭 MFIS
+### Manufacturing Factory Integration System
 
 **Smart Factory Management Platform for IC Programming & Manufacturing Traceability**
 
-整合 **MES、ERP、自動燒錄機、LiteDB、BarTender**，
-提供完整 IC 燒錄流程追蹤、設備管理與智慧製造資訊整合平台。
+整合 **MES、ERP、設備**，
+提供完整 流程追蹤、設備管理與智慧製造資訊整合平台。
 
 ---
 
 ## ✨ Features
 
 - 📊 Dashboard 即時資訊看板
-- 🔍 IC 燒錄工單查詢
+- 🔍 工單查詢
 - 📄 工單資訊整合
 - ⚙️ 設備操作管理
-- 🏷 Reel ID 追溯
+- 🏷 ID 追溯
 - 📈 生產資訊整合
-- 🔄 MES / ERP / DP3T+ 資料整合
+- 🔄 MES / ERP / 設備 資料整合
 
 ---
 
 # 🏗 System Architecture
 
-> 依據 FITS.docx 內容整理。
 
 ```
                  +----------------+
@@ -38,7 +37,7 @@
 +---------+       +--------+-------+      +-------------+
                           |
                    +------v------+
-                   |    FITS     |
+                   |    MFIS     |
                    +------+------+
                           |
           +---------------+---------------+
@@ -71,7 +70,7 @@
 
 
 - 官網連結
-- FITS 首頁
+- MFIS 首頁
 - 登入介面
 
 ---
@@ -85,9 +84,9 @@
 
 ---
 
-## IC Programming Menu
+## Programming Menu
 
-- IC 燒錄功能清單
+- 功能清單
 - 收合 / 展開
 
 ---
@@ -130,11 +129,11 @@
 # 📂 Project Structure
 
 ```text
-FITS/
+MFIS/
 │
 ├── Laravel/
 ├── MESApi/
-├── DP3TApi/
+├── EQPApi/
 ├── images/
 │   ├── architecture.png
 │   ├── home.png
@@ -155,7 +154,7 @@ FITS/
 |--------|-------------|
 | MES | Manufacturing Execution System |
 | ERP | Work Order / Material Information |
-| LiteDB | DP3T+ Programming Machine |
+| LiteDB | EQP+ Programming Machine |
 | BarTender | Reel ID Traceability |
 
 ---
